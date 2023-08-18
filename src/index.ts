@@ -1,5 +1,6 @@
 import Maid from "@rbxts/maid";
 import { RunService, TweenService } from "@rbxts/services";
+import lerpType from "./lerpType";
 
 type callbackOnChange<T> = (value: T) => void;
 type callbackOnReached = () => void;
@@ -49,9 +50,7 @@ type Animatable =
 export default class EasyTween<T extends Animatable> {
     private goalValue: T;
     private value: T
-    private time: number;
-    private easingStyle: Enum.EasingStyle;
-    private easingDirection: Enum.EasingDirection;
+    private tweenInfo: TweenInfo;
     private callbacksOnChange: callbackOnChange<T>[] = [];
     private callbacksOnReached: callbackOnReached[] = [];
     private isReached = false;
@@ -59,13 +58,11 @@ export default class EasyTween<T extends Animatable> {
     private startValue: T;
     private maid = new Maid();
 
-    constructor(value: T, easingStyle = Enum.EasingStyle.Linear, easingDirection = Enum.EasingDirection.In, time = 1) {
+    constructor(value: T, tweenInfo: TweenInfo) {
         this.value = value;
         this.goalValue = value;
 		this.startValue = value;
-        this.time = time;
-        this.easingStyle = easingStyle;
-        this.easingDirection = easingDirection; 
+        this.tweenInfo = tweenInfo;
 
         this.init();
     }
@@ -101,10 +98,10 @@ export default class EasyTween<T extends Animatable> {
         this.maid.GiveTask(RunService.Heartbeat.Connect((dt) => {
             if (this.progress === 1) return;
 
-            const delta = 1 / (60 * this.time)
+            const delta = 1 / (60 * this.tweenInfo.Time)
             this.progress += delta + delta * dt;
             this.progress = math.clamp(this.progress, 0, 1);
-            const alpha = TweenService.GetValue(this.progress, this.easingStyle, this.easingDirection);
+            const alpha = TweenService.GetValue(this.progress, this.tweenInfo.EasingStyle, this.tweenInfo.EasingDirection);
 
             this.value = lerpType(this.startValue, this.goalValue, alpha);
 
