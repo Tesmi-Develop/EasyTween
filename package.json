@@ -1,6 +1,6 @@
 {
   "name": "@rbxts/easytween",
-  "version": "1.0.4",
+  "version": "1.1.4",
   "description": "",
   "main": "out/init.lua",
   "scripts": {
@@ -9,7 +9,12 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": [],
-  "author": "",
+  "author": "Tesmi",
+  "homepage": "https://github.com/Tesmi-Devlop/EasyTween#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tesmi-Devlop/EasyTween"
+  },
   "license": "ISC",
   "types": "out/index.d.ts",
   "files": [

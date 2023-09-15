@@ -26,7 +26,7 @@ class Connection {
     }
 }
 
-type Animatable =
+export type Animatable =
 	| number
 	| CFrame
 	| Color3
@@ -47,18 +47,19 @@ type Animatable =
 	| Vector3int16;
 
 
-export default class EasyTween<T extends Animatable> {
+export default class EasyTween<T> {
     private goalValue: T;
     private value: T
     private tweenInfo: TweenInfo;
     private callbacksOnChange: callbackOnChange<T>[] = [];
     private callbacksOnReached: callbackOnReached[] = [];
     private isReached = false;
-    private progress = 0;
+    private progress = 1;
+    private startingTime = 0;
     private startValue: T;
     private maid = new Maid();
 
-    constructor(value: T, tweenInfo: TweenInfo) {
+    constructor(value: T & Animatable, tweenInfo: TweenInfo) {
         this.value = value;
         this.goalValue = value;
 		this.startValue = value;
@@ -71,24 +72,43 @@ export default class EasyTween<T extends Animatable> {
         this.maid.DoCleaning();
     }
 
-    public Set(value: T) {
+    public Set(value: T & Animatable, newTweenInfo?: TweenInfo) {
         this.goalValue = value;
         this.startValue = this.value;
         this.progress = 0;
         this.isReached = false;
+        this.startingTime = os.clock();
+        this.tweenInfo = newTweenInfo || this.tweenInfo;
+    }
+
+    public SetWitoutTween(value: T & Animatable) {
+        this.goalValue = value;
+        this.startValue = value;
+        this.value = value;
+        this.progress = 1;
+        this.startingTime = os.clock();
+        this.isReached = true;
+    }
+
+    public StopTween() {
+        this.goalValue = this.value;
+        this.startValue = this.value;
+        this.progress = 1;
+        this.startingTime = os.clock();
+        this.isReached = true;
     }
 
     public Get() {
         return this.value;
     }
 
-    public OnChange(callback: callbackOnChange<T>) {
+    public ListenToChange(callback: callbackOnChange<T>) {
         this.callbacksOnChange.push(callback);
 
         return new Connection(callback, this.callbacksOnChange);
     }
 
-    public OnReachedGoal(callback: callbackOnReached) {
+    public ListenToReacheGoal(callback: callbackOnReached) {
         this.callbacksOnReached.push(callback);
 
         return new Connection(callback, this.callbacksOnReached);
@@ -96,10 +116,13 @@ export default class EasyTween<T extends Animatable> {
 
     private init() {
         this.maid.GiveTask(RunService.Heartbeat.Connect((dt) => {
-            if (this.progress === 1) return;
+            if (this.progress >= 1) return;
 
-            const delta = 1 / (60 * this.tweenInfo.Time)
-            this.progress += delta + delta * dt;
+            const endTime = this.tweenInfo.Time + this.startingTime;
+            const deltaTime = os.clock() - this.startingTime;
+
+            this.progress = deltaTime / (endTime - this.startingTime);
+            
             this.progress = math.clamp(this.progress, 0, 1);
             const alpha = TweenService.GetValue(this.progress, this.tweenInfo.EasingStyle, this.tweenInfo.EasingDirection);
 
