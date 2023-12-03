@@ -19,7 +19,7 @@ class Connection {
 
     public Disconnect() {
         const index = this.callbacks.indexOf(this.callback);
-        assert(index !== -1, 'The connection is already broken.');
+        if (index === -1) return;
 
         this.connected = false;
         this.callbacks.remove(index);
