@@ -46,7 +46,6 @@ export type Animatable =
 	| Vector3
 	| Vector3int16;
 
-
 export default class EasyTween<T> {
     private goalValue: T;
     private value: T
@@ -118,10 +117,9 @@ export default class EasyTween<T> {
         this.maid.GiveTask(RunService.Heartbeat.Connect((dt) => {
             if (this.progress >= 1) return;
 
-            const endTime = this.tweenInfo.Time + this.startingTime;
             const deltaTime = os.clock() - this.startingTime;
 
-            this.progress = deltaTime / (endTime - this.startingTime);
+            this.progress = deltaTime / this.tweenInfo.Time;
             
             this.progress = math.clamp(this.progress, 0, 1);
             const alpha = TweenService.GetValue(this.progress, this.tweenInfo.EasingStyle, this.tweenInfo.EasingDirection);
